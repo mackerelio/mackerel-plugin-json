@@ -23,6 +23,7 @@ type JSONPlugin struct {
 	Prefix             string
 	InsecureSkipVerify bool
 	ShowOnlyNum        bool
+	Stdin              bool
 	ExcludeExp         *regexp.Regexp
 	IncludeExp         *regexp.Regexp
 }
@@ -76,18 +77,31 @@ func (p JSONPlugin) outputMetric(path string, value interface{}) (string, float6
 
 // FetchMetrics interface for mackerel-plugin
 func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: p.InsecureSkipVerify},
+
+	var bytes []byte
+	var err error
+
+	if p.URL != "" {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: p.InsecureSkipVerify},
+		}
+		client := &http.Client{Transport: tr}
+		response, err := client.Get(p.URL)
+		if err != nil {
+			return nil, err
+		}
+		defer response.Body.Close()
+		bytes, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			return nil, err
+		}
 	}
-	client := &http.Client{Transport: tr}
-	response, err := client.Get(p.URL)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
+
+	if p.Stdin {
+		bytes, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var content interface{}
@@ -101,20 +115,27 @@ func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
 // Do do doo
 func Do() {
 	url := flag.String("url", "", "URL to get a JSON")
+	stdin := flag.Bool("stdin", false, "Receive JSON from STDIN")
 	prefix := flag.String("prefix", "custom", "Prefix for metric names")
 	insecure := flag.Bool("insecure", false, "Skip certificate verifications")
 	exclude := flag.String("exclude", `^$`, "Exclude metrics that matches the expression")
 	include := flag.String("include", ``, "Output metrics that matches the expression")
 	flag.Parse()
 
-	if *url == "" {
-		fmt.Println("-url is mandatory")
+	if (*url == "") && (*stdin == false) {
+		fmt.Println("-url or -stdin are mandatory")
+		os.Exit(1)
+	}
+
+	if (*url != "") && (*stdin == true) {
+		fmt.Println("-url and -stdin are exclusive")
 		os.Exit(1)
 	}
 
 	var jsonplugin JSONPlugin
 
 	jsonplugin.URL = *url
+	jsonplugin.Stdin = *stdin
 	jsonplugin.Prefix = *prefix
 	jsonplugin.InsecureSkipVerify = *insecure
 	var err error
