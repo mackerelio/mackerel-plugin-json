@@ -6,12 +6,13 @@ Json custom metrics plugin for mackerel.io agent.
 ## Synopsis
 
 ```
-mackerel-plugin-json -url=<url to get JSON> [-prefix=<prefix for a metric name>] [-insecure] [-include=<expression>] [-exclude=<expression>]
+mackerel-plugin-json -url=<url to get JSON> [-prefix=<prefix for a metric name>] [-insecure] [-include=<expression>] [-exclude=<expression>] [-diff=<expression>]
 ```
 
 - `-url` always needs to be specified.
 - If you want to skip a SSL certificate validation (e.g. using a self-signed certificate), you need to specify `-insecure`.
 - If you want to get only metrics that matches a regular expression, specify the expression with `-include`. If you want to get only ones that doesn't match an expression, use `-exclude`.
+- If you want to get metrics as differential, specify the expression with `-diff` that matches to metric name.
 - Metrics that have non-number value (string, `null`, etc.) are omitted.
 - Arrays are supported. Metrics' name will contain a serial number like `custom.elements.0.xxx`, `custom.elements.1.xxx` and so on.
 
