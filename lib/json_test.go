@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -85,4 +87,51 @@ func TestOutputMetric(t *testing.T) {
 	path, value = p.outputMetric("hoge.fuga.foo", 12345.67)
 	assert.EqualValues(t, "", path)
 	assert.EqualValues(t, 0, value)
+}
+
+func TestCalcDiff(t *testing.T) {
+	dir, err := ioutil.TempDir("", "makerel-plugin-json-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	os.Setenv("MACKEREL_PLUGIN_WORKDIR", dir) // to separate tempfile for each test
+
+	var p JSONPlugin
+	p.Prefix = "testprefix"
+	p.DiffExp = regexp.MustCompile(`foo`)
+	p.ExcludeExp = regexp.MustCompile(`^$`)
+	p.IncludeExp = regexp.MustCompile(``)
+
+	ts := time.Now().Unix()
+	{
+		bytes, _ := ioutil.ReadFile("testdata/diff_before.json")
+		var content interface{}
+		err := json.Unmarshal(bytes, &content)
+		if err != nil {
+			panic(err)
+		}
+		stat, err := p.traverseMap(content, []string{p.Prefix})
+		assert.Nil(t, err)
+		stat, err = p.calcDiff(stat, ts)
+		assert.EqualValues(t, 0, stat[p.Prefix+".foo_1"]) // at first
+		assert.EqualValues(t, 0, stat[p.Prefix+".foo_2"]) // at first
+		assert.EqualValues(t, 300, stat[p.Prefix+".bar"])
+	}
+
+	ts += 60
+	{
+		bytes, _ := ioutil.ReadFile("testdata/diff_after.json")
+		var content interface{}
+		err := json.Unmarshal(bytes, &content)
+		if err != nil {
+			panic(err)
+		}
+		stat, err := p.traverseMap(content, []string{p.Prefix})
+		assert.Nil(t, err)
+		stat, err = p.calcDiff(stat, ts)
+		assert.EqualValues(t, 0, stat[p.Prefix+".foo_1"])   // reset
+		assert.EqualValues(t, 100, stat[p.Prefix+".foo_2"]) // diff
+		assert.EqualValues(t, 400, stat[p.Prefix+".bar"])
+	}
 }
