@@ -95,7 +95,10 @@ func TestCalcDiff(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
-	os.Setenv("MACKEREL_PLUGIN_WORKDIR", dir) // to separate tempfile for each test
+
+	orig := os.Getenv("MACKEREL_PLUGIN_WORKDIR")
+	os.Setenv("MACKEREL_PLUGIN_WORKDIR", dir)        // to separate tempfile for each test
+	defer os.Setenv("MACKEREL_PLUGIN_WORKDIR", orig) // restore
 
 	var p JSONPlugin
 	p.Prefix = "testprefix"
