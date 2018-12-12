@@ -34,6 +34,7 @@ type JSONPlugin struct {
 	DiffExp            *regexp.Regexp
 }
 
+// Values represents metric values
 type Values struct {
 	LastTimestamp int64              `json:"last_timestamp"`
 	Metrics       map[string]float64 `json:"metrics"`
