@@ -96,11 +96,15 @@ func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
 	var err error
 
 	if p.URL != "" {
+		req, err := http.NewRequest("GET", p.URL, nil)
+		if err != nil {
+			return nil, err
+		}
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: p.InsecureSkipVerify},
 		}
 		client := &http.Client{Transport: tr}
-		response, err := client.Get(p.URL)
+		response, err := client.Do(req)
 		if err != nil {
 			return nil, err
 		}
