@@ -138,3 +138,22 @@ func TestCalcDiff(t *testing.T) {
 		assert.EqualValues(t, 400, stat[p.Prefix+".bar"])
 	}
 }
+
+func TestParseHeader(t *testing.T) {
+
+	host := "example.com"
+	userAgent := "mackerel-plugin-json/0.0.1"
+
+	h := []string{fmt.Sprintf("Host: %v", host)}
+
+	header, _ := parseHeader(h)
+
+	assert.EqualValues(t, host, header.Get("Host"))
+
+	h = []string{fmt.Sprintf("Host: %v", host), fmt.Sprintf("User-Agent: %v", userAgent)}
+
+	header, _ = parseHeader(h)
+
+	assert.EqualValues(t, host, header.Get("Host"))
+	assert.EqualValues(t, userAgent, header.Get("User-Agent"))
+}

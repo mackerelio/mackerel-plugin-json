@@ -1,6 +1,7 @@
 package mpjson
 
 import (
+	"bufio"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -254,4 +256,14 @@ func Do() {
 	for k, v := range metrics {
 		fmt.Printf("%s\t%f\t%d\n", k, v, ts)
 	}
+}
+
+func parseHeader(headers []string) (http.Header, error) {
+	reader := bufio.NewReader(strings.NewReader(strings.Join(headers, "\r\n") + "\r\n\r\n"))
+	tp := textproto.NewReader(reader)
+	mimeheader, err := tp.ReadMIMEHeader()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse header: %s", err)
+	}
+	return http.Header(mimeheader), nil
 }
