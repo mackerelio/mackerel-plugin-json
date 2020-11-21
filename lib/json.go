@@ -22,6 +22,17 @@ import (
 	"github.com/mackerelio/golib/pluginutil"
 )
 
+type httpHeaders []string
+
+func (s *httpHeaders) String() string {
+	return fmt.Sprintf("%v", *s)
+}
+
+func (s *httpHeaders) Set(v string) error {
+	*s = append(*s, v)
+	return nil
+}
+
 // JSONPlugin plugin for JSON
 type JSONPlugin struct {
 	Target             string
@@ -31,6 +42,7 @@ type JSONPlugin struct {
 	InsecureSkipVerify bool
 	ShowOnlyNum        bool
 	Stdin              bool
+	Headers            httpHeaders
 	ExcludeExp         *regexp.Regexp
 	IncludeExp         *regexp.Regexp
 	DiffExp            *regexp.Regexp
@@ -100,6 +112,20 @@ func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		if len(p.Headers) != 0 {
+			header, err := parseHeader(p.Headers)
+			if err != nil {
+				return nil, err
+			}
+			// Host header must be set via req.Host
+			if host := header.Get("Host"); len(host) != 0 {
+				req.Host = host
+				header.Del("Host")
+			}
+			req.Header = header
+		}
+
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: p.InsecureSkipVerify},
 		}
@@ -207,6 +233,8 @@ func (p JSONPlugin) saveValues(v Values) error {
 
 // Do do doo
 func Do() {
+	var headers httpHeaders
+
 	url := flag.String("url", "", "URL to get a JSON")
 	stdin := flag.Bool("stdin", false, "Receive JSON from STDIN")
 	prefix := flag.String("prefix", "custom", "Prefix for metric names")
@@ -214,6 +242,7 @@ func Do() {
 	exclude := flag.String("exclude", `^$`, "Exclude metrics that matches the expression")
 	include := flag.String("include", ``, "Output metrics that matches the expression")
 	diff := flag.String("diff", ``, "Calculate difference of metrics that matches the expression")
+	flag.Var(&headers, "header", "HTTP request headers")
 	flag.Parse()
 
 	if (*url == "") && (*stdin == false) {
@@ -232,6 +261,7 @@ func Do() {
 	jsonplugin.Stdin = *stdin
 	jsonplugin.Prefix = *prefix
 	jsonplugin.InsecureSkipVerify = *insecure
+	jsonplugin.Headers = headers
 	var err error
 	jsonplugin.ExcludeExp, err = regexp.Compile(*exclude)
 	if err != nil {
