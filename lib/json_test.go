@@ -146,14 +146,16 @@ func TestParseHeader(t *testing.T) {
 
 	h := []string{fmt.Sprintf("Host: %v", host)}
 
-	header, _ := parseHeader(h)
+	header, err := parseHeader(h)
 
+	assert.Nil(t, err)
 	assert.EqualValues(t, host, header.Get("Host"))
 
 	h = []string{fmt.Sprintf("Host: %v", host), fmt.Sprintf("User-Agent: %v", userAgent)}
 
-	header, _ = parseHeader(h)
+	header, err = parseHeader(h)
 
+	assert.Nil(t, err)
 	assert.EqualValues(t, host, header.Get("Host"))
 	assert.EqualValues(t, userAgent, header.Get("User-Agent"))
 }
