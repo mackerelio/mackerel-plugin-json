@@ -138,3 +138,24 @@ func TestCalcDiff(t *testing.T) {
 		assert.EqualValues(t, 400, stat[p.Prefix+".bar"])
 	}
 }
+
+func TestParseHeader(t *testing.T) {
+
+	host := "example.com"
+	cacheControl := "no-cache"
+
+	h := []string{fmt.Sprintf("Host: %v", host)}
+
+	header, err := parseHeader(h)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, host, header.Get("Host"))
+
+	h = []string{fmt.Sprintf("Host: %v", host), fmt.Sprintf("Cache-Control: %v", cacheControl)}
+
+	header, err = parseHeader(h)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, host, header.Get("Host"))
+	assert.EqualValues(t, cacheControl, header.Get("Cache-Control"))
+}

@@ -1,6 +1,7 @@
 package mpjson
 
 import (
+	"bufio"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -20,6 +22,17 @@ import (
 	"github.com/mackerelio/golib/pluginutil"
 )
 
+type httpHeaders []string
+
+func (s *httpHeaders) String() string {
+	return fmt.Sprintf("%v", *s)
+}
+
+func (s *httpHeaders) Set(v string) error {
+	*s = append(*s, v)
+	return nil
+}
+
 // JSONPlugin plugin for JSON
 type JSONPlugin struct {
 	Target             string
@@ -29,6 +42,7 @@ type JSONPlugin struct {
 	InsecureSkipVerify bool
 	ShowOnlyNum        bool
 	Stdin              bool
+	Headers            httpHeaders
 	ExcludeExp         *regexp.Regexp
 	IncludeExp         *regexp.Regexp
 	DiffExp            *regexp.Regexp
@@ -94,11 +108,29 @@ func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
 	var err error
 
 	if p.URL != "" {
+		req, err := http.NewRequest("GET", p.URL, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(p.Headers) != 0 {
+			header, err := parseHeader(p.Headers)
+			if err != nil {
+				return nil, err
+			}
+			// Host header must be set via req.Host
+			if host := header.Get("Host"); len(host) != 0 {
+				req.Host = host
+				header.Del("Host")
+			}
+			req.Header = header
+		}
+
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: p.InsecureSkipVerify},
 		}
 		client := &http.Client{Transport: tr}
-		response, err := client.Get(p.URL)
+		response, err := client.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -201,6 +233,8 @@ func (p JSONPlugin) saveValues(v Values) error {
 
 // Do do doo
 func Do() {
+	var headers httpHeaders
+
 	url := flag.String("url", "", "URL to get a JSON")
 	stdin := flag.Bool("stdin", false, "Receive JSON from STDIN")
 	prefix := flag.String("prefix", "custom", "Prefix for metric names")
@@ -208,6 +242,7 @@ func Do() {
 	exclude := flag.String("exclude", `^$`, "Exclude metrics that matches the expression")
 	include := flag.String("include", ``, "Output metrics that matches the expression")
 	diff := flag.String("diff", ``, "Calculate difference of metrics that matches the expression")
+	flag.Var(&headers, "header", "HTTP request headers")
 	flag.Parse()
 
 	if (*url == "") && (*stdin == false) {
@@ -226,6 +261,7 @@ func Do() {
 	jsonplugin.Stdin = *stdin
 	jsonplugin.Prefix = *prefix
 	jsonplugin.InsecureSkipVerify = *insecure
+	jsonplugin.Headers = headers
 	var err error
 	jsonplugin.ExcludeExp, err = regexp.Compile(*exclude)
 	if err != nil {
@@ -254,4 +290,14 @@ func Do() {
 	for k, v := range metrics {
 		fmt.Printf("%s\t%f\t%d\n", k, v, ts)
 	}
+}
+
+func parseHeader(headers []string) (http.Header, error) {
+	reader := bufio.NewReader(strings.NewReader(strings.Join(headers, "\r\n") + "\r\n\r\n"))
+	tp := textproto.NewReader(reader)
+	mimeheader, err := tp.ReadMIMEHeader()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse header: %s", err)
+	}
+	return http.Header(mimeheader), nil
 }

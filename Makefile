@@ -2,7 +2,7 @@ setup:
 	go get \
 		github.com/Songmu/goxz/cmd/goxz \
 		github.com/tcnksm/ghr \
-		github.com/golang/lint/golint
+		golang.org/x/lint/golint
 	go get -d -t ./...
 
 test: setup
