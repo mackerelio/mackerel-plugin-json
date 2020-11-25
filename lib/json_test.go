@@ -142,7 +142,7 @@ func TestCalcDiff(t *testing.T) {
 func TestParseHeader(t *testing.T) {
 
 	host := "example.com"
-	userAgent := "mackerel-plugin-json/0.0.1"
+	cacheControl := "no-cache"
 
 	h := []string{fmt.Sprintf("Host: %v", host)}
 
@@ -151,11 +151,11 @@ func TestParseHeader(t *testing.T) {
 	assert.Nil(t, err)
 	assert.EqualValues(t, host, header.Get("Host"))
 
-	h = []string{fmt.Sprintf("Host: %v", host), fmt.Sprintf("User-Agent: %v", userAgent)}
+	h = []string{fmt.Sprintf("Host: %v", host), fmt.Sprintf("Cache-Control: %v", cacheControl)}
 
 	header, err = parseHeader(h)
 
 	assert.Nil(t, err)
 	assert.EqualValues(t, host, header.Get("Host"))
-	assert.EqualValues(t, userAgent, header.Get("User-Agent"))
+	assert.EqualValues(t, cacheControl, header.Get("Cache-Control"))
 }
