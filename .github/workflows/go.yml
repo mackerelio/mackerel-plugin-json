@@ -30,5 +30,3 @@ jobs:
       id: go
     - uses: actions/checkout@v2
     - run: ./script/release
-      env:
-        GITHUB_TOKEN: ${{ secrets.MACKERELBOT_GITHUB_TOKEN }}
