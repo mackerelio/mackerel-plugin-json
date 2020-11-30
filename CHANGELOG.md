@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.2.0](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.1.0...v1.2.0) (2020-11-26)
+
+* Add -header option [#5](https://github.com/mackerelio/mackerel-plugin-json/pull/5) ([cohalz](https://github.com/cohalz))
+
 ## [v1.1.0](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.0.1...v1.1.0) (2018-12-13)
 
 * Add -diff option [#4](https://github.com/mackerelio/mackerel-plugin-json/pull/4) ([fujiwara](https://github.com/fujiwara))
