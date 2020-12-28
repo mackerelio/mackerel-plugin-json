@@ -1,5 +1,10 @@
 # Changelog
 
+## [v1.2.1](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.2.0...v1.2.1) (2020-12-28)
+
+* add arm64 binaries to GitHub releases [#9](https://github.com/mackerelio/mackerel-plugin-json/pull/9) ([astj](https://github.com/astj))
+* use GitHub Actions [#6](https://github.com/mackerelio/mackerel-plugin-json/pull/6), [#7](https://github.com/mackerelio/mackerel-plugin-json/pull/7), and [#8](https://github.com/mackerelio/mackerel-plugin-json/pull/8) ([lufia](https://github.com/lufia))
+
 ## [v1.2.0](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.1.0...v1.2.0) (2020-11-26)
 
 * Add -header option [#5](https://github.com/mackerelio/mackerel-plugin-json/pull/5) ([cohalz](https://github.com/cohalz))
