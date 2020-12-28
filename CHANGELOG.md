@@ -1,6 +1,12 @@
 # Changelog
 
+## [v1.2.2](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.2.1...v1.2.2) (2020-12-28)
+
+* do not try to build darwin-arm64 [#10](https://github.com/mackerelio/mackerel-plugin-json/pull/10) ([astj](https://github.com/astj))
+
 ## [v1.2.1](https://github.com/mackerelio/mackerel-plugin-json/compare/v1.2.0...v1.2.1) (2020-12-28)
+
+Unreleased due to build error.
 
 * add arm64 binaries to GitHub releases [#9](https://github.com/mackerelio/mackerel-plugin-json/pull/9) ([astj](https://github.com/astj))
 * use GitHub Actions [#6](https://github.com/mackerelio/mackerel-plugin-json/pull/6), [#7](https://github.com/mackerelio/mackerel-plugin-json/pull/7), and [#8](https://github.com/mackerelio/mackerel-plugin-json/pull/8) ([lufia](https://github.com/lufia))
