@@ -63,6 +63,19 @@ func TestTraverseMap(t *testing.T) {
 
 	assert.EqualValues(t, 10, stat[p.Prefix+".0.count1"])
 	assert.EqualValues(t, 30, stat[p.Prefix+".1.count1"])
+
+	// Ignore unexpected type
+	bytes, _ = ioutil.ReadFile("testdata/unexpected.json")
+	err = json.Unmarshal(bytes, &content)
+	if err != nil {
+		panic(err)
+	}
+	stat, err = p.traverseMap(content, []string{p.Prefix})
+
+	assert.Nil(t, err)
+
+	assert.EqualValues(t, 10, stat[p.Prefix+".foo"])
+	assert.EqualValues(t, 30, stat[p.Prefix+".bar"])
 }
 
 func TestOutputMetric(t *testing.T) {
