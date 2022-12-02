@@ -63,8 +63,8 @@ func (p JSONPlugin) traverseMap(content interface{}, path []string) (map[string]
 				stat[tk] = tv
 			}
 		}
-	} else {
-		for k, v := range content.(map[string]interface{}) {
+	} else if obj, ok := content.(map[string]interface{}); ok {
+		for k, v := range obj {
 			if v != nil {
 				if reflect.TypeOf(v).Kind() == reflect.Map {
 					ts, _ := p.traverseMap(v, append(path, k))

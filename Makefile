@@ -1,8 +1,7 @@
 setup:
-	go get \
-		github.com/Songmu/goxz/cmd/goxz \
-		github.com/tcnksm/ghr \
-		golang.org/x/lint/golint
+	go install github.com/Songmu/goxz/cmd/goxz@latest
+	go install github.com/tcnksm/ghr@latest
+	go install golang.org/x/lint/golint@latest
 	go get -d -t ./...
 
 test: setup
