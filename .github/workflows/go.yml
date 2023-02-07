@@ -1,11 +1,7 @@
 name: Go
 on:
   pull_request: {}
-  push:
-    tags:
-      - "v[0-9]*"
-env:
-  GO111MODULE: on
+
 jobs:
   test:
     name: Test
@@ -14,22 +10,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.19
-        id: go
       - uses: actions/checkout@v3
       - run: make test
       - run: make lint
-  release:
-    name: Release to GitHub Releases
-    runs-on: ubuntu-latest
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-        id: go
-      - uses: actions/checkout@v3
-      - run: make setup
-      - run: ./script/release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
