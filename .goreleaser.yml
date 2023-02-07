@@ -1,0 +1,19 @@
+builds:
+  - binary: mackerel-plugin-json
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - 386
+    ignore:
+      - goos: darwin
+        goarch: 386
+archives:
+  - format: zip
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+release:
+  github:
+    owner: mackerelio
+    name: mackerel-plugin-json
