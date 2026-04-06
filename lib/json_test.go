@@ -20,7 +20,7 @@ func TestTraverseMap(t *testing.T) {
 	p.IncludeExp = regexp.MustCompile(``)
 
 	bytes, _ := ioutil.ReadFile("testdata/jolokia.json")
-	var content interface{}
+	var content any
 	err := json.Unmarshal(bytes, &content)
 	if err != nil {
 		panic(err)
@@ -122,7 +122,7 @@ func TestCalcDiff(t *testing.T) {
 	ts := time.Now().Unix()
 	{
 		bytes, _ := ioutil.ReadFile("testdata/diff_before.json")
-		var content interface{}
+		var content any
 		err := json.Unmarshal(bytes, &content)
 		if err != nil {
 			panic(err)
@@ -138,7 +138,7 @@ func TestCalcDiff(t *testing.T) {
 	ts += 60
 	{
 		bytes, _ := ioutil.ReadFile("testdata/diff_after.json")
-		var content interface{}
+		var content any
 		err := json.Unmarshal(bytes, &content)
 		if err != nil {
 			panic(err)

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"maps"
 	"net/http"
 	"net/textproto"
 	"os"
@@ -54,29 +55,23 @@ type Values struct {
 	Metrics       map[string]float64 `json:"metrics"`
 }
 
-func (p JSONPlugin) traverseMap(content interface{}, path []string) (map[string]float64, error) {
+func (p JSONPlugin) traverseMap(content any, path []string) (map[string]float64, error) {
 	stat := make(map[string]float64)
 	if reflect.TypeOf(content).Kind() == reflect.Slice {
-		for i, c := range content.([]interface{}) {
+		for i, c := range content.([]any) {
 			ts, _ := p.traverseMap(c, append(path, strconv.Itoa(i)))
-			for tk, tv := range ts {
-				stat[tk] = tv
-			}
+			maps.Copy(stat, ts)
 		}
-	} else if obj, ok := content.(map[string]interface{}); ok {
+	} else if obj, ok := content.(map[string]any); ok {
 		for k, v := range obj {
 			if v != nil {
 				if reflect.TypeOf(v).Kind() == reflect.Map {
 					ts, _ := p.traverseMap(v, append(path, k))
-					for tk, tv := range ts {
-						stat[tk] = tv
-					}
+					maps.Copy(stat, ts)
 				} else if reflect.TypeOf(v).Kind() == reflect.Slice {
-					for i, c := range v.([]interface{}) {
+					for i, c := range v.([]any) {
 						ts, _ := p.traverseMap(c, append(path, strconv.Itoa(i)))
-						for tk, tv := range ts {
-							stat[tk] = tv
-						}
+						maps.Copy(stat, ts)
 					}
 				} else {
 					tk, tv := p.outputMetric(strings.Join(append(path, k), "."), v)
@@ -91,7 +86,7 @@ func (p JSONPlugin) traverseMap(content interface{}, path []string) (map[string]
 	return stat, nil
 }
 
-func (p JSONPlugin) outputMetric(path string, value interface{}) (string, float64) {
+func (p JSONPlugin) outputMetric(path string, value any) (string, float64) {
 	if p.IncludeExp.MatchString(path) && !p.ExcludeExp.MatchString(path) {
 		if reflect.TypeOf(value).Kind() == reflect.Float64 {
 			return path, value.(float64)
@@ -148,7 +143,7 @@ func (p JSONPlugin) FetchMetrics() (map[string]float64, error) {
 		}
 	}
 
-	var content interface{}
+	var content any
 	if err := json.Unmarshal(bytes, &content); err != nil {
 		return nil, err
 	}
