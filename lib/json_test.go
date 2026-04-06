@@ -34,7 +34,7 @@ func TestTraverseMap(t *testing.T) {
 	// A metric having null (nil) value shouldn't be contained.
 	if _, ok := stat[p.Prefix+".value.ObjectPendingFinalizationCount"]; ok {
 		fmt.Println(ok)
-		t.Fatalf(p.Prefix + ".value.ObjectPendingFinalizationCount shouldn't exist.")
+		t.Fatal(p.Prefix + ".value.ObjectPendingFinalizationCount shouldn't exist.")
 	}
 
 	// Tests for slice handling
