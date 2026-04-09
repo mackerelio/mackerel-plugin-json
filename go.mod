@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/mackerelio/golib v1.0.0
+	github.com/mackerelio/golib v1.2.2
 	github.com/stretchr/testify v1.3.0
 )
 
