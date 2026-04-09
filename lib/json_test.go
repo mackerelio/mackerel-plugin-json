@@ -20,7 +20,7 @@ func TestTraverseMap(t *testing.T) {
 	p.IncludeExp = regexp.MustCompile(``)
 
 	bytes, _ := ioutil.ReadFile("testdata/jolokia.json")
-	var content interface{}
+	var content any
 	err := json.Unmarshal(bytes, &content)
 	if err != nil {
 		panic(err)
@@ -34,7 +34,7 @@ func TestTraverseMap(t *testing.T) {
 	// A metric having null (nil) value shouldn't be contained.
 	if _, ok := stat[p.Prefix+".value.ObjectPendingFinalizationCount"]; ok {
 		fmt.Println(ok)
-		t.Fatalf(p.Prefix + ".value.ObjectPendingFinalizationCount shouldn't exist.")
+		t.Fatal(p.Prefix + ".value.ObjectPendingFinalizationCount shouldn't exist.")
 	}
 
 	// Tests for slice handling
@@ -122,7 +122,7 @@ func TestCalcDiff(t *testing.T) {
 	ts := time.Now().Unix()
 	{
 		bytes, _ := ioutil.ReadFile("testdata/diff_before.json")
-		var content interface{}
+		var content any
 		err := json.Unmarshal(bytes, &content)
 		if err != nil {
 			panic(err)
@@ -138,7 +138,7 @@ func TestCalcDiff(t *testing.T) {
 	ts += 60
 	{
 		bytes, _ := ioutil.ReadFile("testdata/diff_after.json")
-		var content interface{}
+		var content any
 		err := json.Unmarshal(bytes, &content)
 		if err != nil {
 			panic(err)
